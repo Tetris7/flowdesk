@@ -20,10 +20,14 @@ import type {
  * access control.
  */
 
-function unwrap<T>(res: { data: T | null; error: { message: string } | null }): T {
-  if (res.error) throw new Error(res.error.message)
-  if (res.data === null) throw new Error('No data returned')
-  return res.data
+// Takes `data` and `error` as two separate arguments (rather than one
+// response object) so TypeScript can infer T cleanly from `data` alone —
+// inferring T from the whole `{data, error}` response object caused it to
+// widen back to `T | null` at every call site.
+function unwrap<T>(data: T | null, error: { message: string } | null): T {
+  if (error) throw new Error(error.message)
+  if (data === null) throw new Error('No data returned')
+  return data
 }
 
 async function logActivity(projectId: string, actorId: string, action: ActivityLog['action'], detail: string) {
@@ -33,24 +37,24 @@ async function logActivity(projectId: string, actorId: string, action: ActivityL
 // ---------- Profiles / Team ----------
 
 export async function listProfiles(_userId: string): Promise<Profile[]> {
-  const res = await supabase.from('profiles').select('*').order('full_name')
-  return unwrap(res)
+  const { data, error } = await supabase.from('profiles').select('*').order('full_name')
+  return unwrap<Profile[]>(data, error)
 }
 
 export async function listMemberships(_userId: string, projectId?: string): Promise<TeamMembership[]> {
   let query = supabase.from('team_memberships').select('*')
   if (projectId) query = query.eq('project_id', projectId)
-  return unwrap(await query)
+  const { data, error } = await query
+  return unwrap<TeamMembership[]>(data, error)
 }
 
 export async function addMember(userId: string, projectId: string, profileId: string, role: TeamMembership['role']) {
-  const membership = unwrap(
-    await supabase
-      .from('team_memberships')
-      .insert({ project_id: projectId, profile_id: profileId, role, active: true })
-      .select()
-      .single()
-  )
+  const { data, error } = await supabase
+    .from('team_memberships')
+    .insert({ project_id: projectId, profile_id: profileId, role, active: true })
+    .select()
+    .single()
+  const membership = unwrap<TeamMembership>(data, error)
   await logActivity(projectId, userId, 'member_added', 'added a new member to the project')
   return membership
 }
@@ -60,40 +64,39 @@ export async function addMember(userId: string, projectId: string, profileId: st
 export async function listProjects(_userId: string, status?: ProjectStatus | 'all'): Promise<Project[]> {
   let query = supabase.from('projects').select('*').order('updated_at', { ascending: false })
   if (status && status !== 'all') query = query.eq('status', status)
-  return unwrap(await query)
+  const { data, error } = await query
+  return unwrap<Project[]>(data, error)
 }
 
 export async function getProject(_userId: string, projectId: string): Promise<Project | null> {
   const { data, error } = await supabase.from('projects').select('*').eq('id', projectId).single()
   if (error) return null
-  return data
+  return data as Project
 }
 
 export async function createProject(
   userId: string,
   input: { name: string; description: string; color: string }
 ): Promise<Project> {
-  const project = unwrap(
-    await supabase
-      .from('projects')
-      .insert({ name: input.name, description: input.description, color: input.color, owner_id: userId, status: 'active' })
-      .select()
-      .single()
-  )
+  const insertRes = await supabase
+    .from('projects')
+    .insert({ name: input.name, description: input.description, color: input.color, owner_id: userId, status: 'active' })
+    .select()
+    .single()
+  const project = unwrap<Project>(insertRes.data, insertRes.error)
   await supabase.from('team_memberships').insert({ project_id: project.id, profile_id: userId, role: 'owner', active: true })
   await logActivity(project.id, userId, 'project_created', `created the project "${project.name}"`)
   return project
 }
 
 export async function updateProject(userId: string, projectId: string, patch: Partial<Project>): Promise<Project> {
-  const updated = unwrap(
-    await supabase
-      .from('projects')
-      .update({ ...patch, updated_at: new Date().toISOString() })
-      .eq('id', projectId)
-      .select()
-      .single()
-  )
+  const { data, error } = await supabase
+    .from('projects')
+    .update({ ...patch, updated_at: new Date().toISOString() })
+    .eq('id', projectId)
+    .select()
+    .single()
+  const updated = unwrap<Project>(data, error)
   if (patch.status === 'archived') {
     await logActivity(projectId, userId, 'project_archived', `archived "${updated.name}"`)
   }
@@ -111,16 +114,22 @@ export async function listTasks(_userId: string, filters?: { projectId?: string;
   let query = supabase.from('tasks').select('*').order('created_at', { ascending: false })
   if (filters?.projectId) query = query.eq('project_id', filters.projectId)
   if (filters?.status) query = query.eq('status', filters.status)
-  return unwrap(await query)
+  const { data, error } = await query
+  return unwrap<Task[]>(data, error)
 }
 
 export async function createTask(
   userId: string,
   input: Omit<Task, 'id' | 'created_at' | 'updated_at'>
 ): Promise<Task> {
-  const task = unwrap(await supabase.from('tasks').insert(input).select().single())
-  const { data: project } = await supabase.from('projects').select('name').eq('id', task.project_id).single()
-  await logActivity(task.project_id, userId, 'task_created', `created task "${task.title}"${project ? ` in ${project.name}` : ''}`)
+  const insertRes = await supabase.from('tasks').insert(input).select().single()
+  const task = unwrap<Task>(insertRes.data, insertRes.error)
+
+  const { data: projectRow } = await supabase.from('projects').select('name').eq('id', task.project_id).single()
+  const projectName = (projectRow as { name: string } | null)?.name
+
+  await logActivity(task.project_id, userId, 'task_created', `created task "${task.title}"${projectName ? ` in ${projectName}` : ''}`)
+
   if (task.assignee_id && task.assignee_id !== userId) {
     await supabase.from('notifications').insert({
       profile_id: task.assignee_id,
@@ -134,15 +143,17 @@ export async function createTask(
 }
 
 export async function updateTask(userId: string, taskId: string, patch: Partial<Task>): Promise<Task> {
-  const { data: before } = await supabase.from('tasks').select('*').eq('id', taskId).single()
-  const updated = unwrap(
-    await supabase
-      .from('tasks')
-      .update({ ...patch, updated_at: new Date().toISOString() })
-      .eq('id', taskId)
-      .select()
-      .single()
-  )
+  const { data: beforeRow } = await supabase.from('tasks').select('*').eq('id', taskId).single()
+  const before = beforeRow as Task | null
+
+  const { data, error } = await supabase
+    .from('tasks')
+    .update({ ...patch, updated_at: new Date().toISOString() })
+    .eq('id', taskId)
+    .select()
+    .single()
+  const updated = unwrap<Task>(data, error)
+
   if (patch.status && before && patch.status !== before.status) {
     const action = patch.status === 'completed' ? 'task_completed' : 'task_status_changed'
     await logActivity(updated.project_id, userId, action, `moved "${updated.title}" to ${patch.status.replace('_', ' ')}`)
@@ -158,28 +169,30 @@ export async function deleteTask(_userId: string, taskId: string): Promise<void>
 // ---------- Comments ----------
 
 export async function listComments(_userId: string, taskId: string): Promise<Comment[]> {
-  const res = await supabase.from('comments').select('*').eq('task_id', taskId).order('created_at', { ascending: true })
-  return unwrap(res)
+  const { data, error } = await supabase.from('comments').select('*').eq('task_id', taskId).order('created_at', { ascending: true })
+  return unwrap<Comment[]>(data, error)
 }
 
 export async function addComment(userId: string, taskId: string, body: string): Promise<Comment> {
-  const comment = unwrap(
-    await supabase.from('comments').insert({ task_id: taskId, author_id: userId, body }).select().single()
-  )
-  const { data: task } = await supabase.from('tasks').select('title, project_id').eq('id', taskId).single()
+  const insertRes = await supabase.from('comments').insert({ task_id: taskId, author_id: userId, body }).select().single()
+  const comment = unwrap<Comment>(insertRes.data, insertRes.error)
+
+  const { data: taskRow } = await supabase.from('tasks').select('title, project_id').eq('id', taskId).single()
+  const task = taskRow as { title: string; project_id: string } | null
   if (task) await logActivity(task.project_id, userId, 'comment_added', `commented on "${task.title}"`)
+
   return comment
 }
 
 // ---------- Notifications ----------
 
 export async function listNotifications(userId: string): Promise<Notification[]> {
-  const res = await supabase
+  const { data, error } = await supabase
     .from('notifications')
     .select('*')
     .eq('profile_id', userId)
     .order('created_at', { ascending: false })
-  return unwrap(res)
+  return unwrap<Notification[]>(data, error)
 }
 
 export async function markNotificationRead(_userId: string, notifId: string): Promise<void> {
@@ -191,7 +204,8 @@ export async function markNotificationRead(_userId: string, notifId: string): Pr
 export async function listActivity(_userId: string, projectId?: string, limit = 20): Promise<ActivityLog[]> {
   let query = supabase.from('activity_logs').select('*').order('created_at', { ascending: false }).limit(limit)
   if (projectId) query = query.eq('project_id', projectId)
-  return unwrap(await query)
+  const { data, error } = await query
+  return unwrap<ActivityLog[]>(data, error)
 }
 
 // ---------- Dashboard aggregate ----------
@@ -246,3 +260,4 @@ export async function ensureWorkspace(userId: string, _fullName: string, _email:
     })
   }
 }
+
