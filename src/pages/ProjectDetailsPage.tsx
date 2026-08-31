@@ -92,17 +92,17 @@ export default function ProjectDetailsPage() {
     if (!user) return
     if (editingTask) {
       const updated = await updateTask(user.id, editingTask.id, input)
-      setData({ ...data, tasks: tasks.map((t) => (t.id === updated.id ? updated : t)) })
+      setData((prev) => (prev ? { ...prev, tasks: prev.tasks.map((t) => (t.id === updated.id ? updated : t)) } : prev))
     } else {
       const created = await createTask(user.id, input)
-      setData({ ...data, tasks: [created, ...tasks] })
+      setData((prev) => (prev ? { ...prev, tasks: [created, ...prev.tasks] } : prev))
     }
   }
 
   async function handleDeleteTask() {
     if (!user || !editingTask) return
     await deleteTask(user.id, editingTask.id)
-    setData({ ...data, tasks: tasks.filter((t) => t.id !== editingTask.id) })
+    setData((prev) => (prev ? { ...prev, tasks: prev.tasks.filter((t) => t.id !== editingTask.id) } : prev))
     setTaskModalOpen(false)
     setEditingTask(null)
   }
@@ -110,7 +110,7 @@ export default function ProjectDetailsPage() {
   async function handleArchive() {
     if (!user) return
     const updated = await updateProject(user.id, project.id, { status: project.status === 'archived' ? 'active' : 'archived' })
-    setData({ ...data, project: updated })
+    setData((prev) => (prev ? { ...prev, project: updated } : prev))
   }
 
   async function handleDeleteProject() {
@@ -123,7 +123,7 @@ export default function ProjectDetailsPage() {
   async function handleAddMember(profileId: string) {
     if (!user) return
     const membership = await addMember(user.id, project.id, profileId, 'member')
-    setData({ ...data, memberships: [...memberships, membership] })
+    setData((prev) => (prev ? { ...prev, memberships: [...prev.memberships, membership] } : prev))
     setAddMemberOpen(false)
   }
 
@@ -267,7 +267,7 @@ export default function ProjectDetailsPage() {
                 tasks={tasks}
                 profiles={profiles}
                 projects={[project]}
-                onTasksChange={(next) => setData({ ...data, tasks: next })}
+                onTasksChange={(next) => setData((prev) => (prev ? { ...prev, tasks: next } : prev))}
                 onCardClick={(task) => {
                   setEditingTask(task)
                   setTaskModalOpen(true)
