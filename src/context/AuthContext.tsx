@@ -14,6 +14,17 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+// Seeding a starter project is a nice-to-have, not something that should
+// ever be allowed to block someone from actually logging in.
+async function trySeedWorkspace(u: AuthUser) {
+  try {
+    await ensureWorkspace(u.id, u.full_name, u.email)
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('Starter workspace seeding failed (non-fatal):', err)
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -23,14 +34,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     auth.getSession().then((session) => {
       if (!mounted) return
-      if (session) ensureWorkspace(session.id, session.full_name, session.email)
+      if (session) trySeedWorkspace(session)
       setUser(session)
       setLoading(false)
     })
 
-    // Keep the user in sync with Supabase's own session state — this covers
-    // token refresh, sign-out from another tab, and email-confirmation
-    // redirects, none of which go through the signIn/signUp calls below.
     const { data: subscription } = auth.onAuthStateChange((nextUser) => {
       if (!mounted) return
       setUser(nextUser)
@@ -48,12 +56,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     signUp: async (fullName, email, password) => {
       const u = await auth.signUp(fullName, email, password)
-      await ensureWorkspace(u.id, u.full_name, u.email)
+      await trySeedWorkspace(u)
       setUser(u)
     },
     signIn: async (email, password) => {
       const u = await auth.signIn(email, password)
-      await ensureWorkspace(u.id, u.full_name, u.email)
+      await trySeedWorkspace(u)
       setUser(u)
     },
     signOut: async () => {
@@ -71,3 +79,4 @@ export function useAuth(): AuthContextValue {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }
+
