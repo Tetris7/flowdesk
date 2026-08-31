@@ -47,7 +47,13 @@ Through this project, I worked on:
 - Working with charts and data visualization
 - Implementing drag-and-drop interactions
 
-## <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/4696d913-40b0-4d12-9b97-95a479a16a74" />
+## screenshot
+
+<img width="1170" height="2007" alt="image" src="https://github.com/user-attachments/assets/923ef7c9-5b9f-467d-947f-382c333b2f84" />
+
+<img width="1170" height="1867" alt="image" src="https://github.com/user-attachments/assets/aab17231-206a-4275-9977-e1a7eceda855" />
+
+<img width="1170" height="1938" alt="image" src="https://github.com/user-attachments/assets/68ceca48-1255-424a-a87f-6e52ca34a72f" />
 
 
 ## 👨🏽‍💻 Author
