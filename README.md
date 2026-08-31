@@ -1,87 +1,60 @@
-# FlowDesk
+# FlowDesk 🚀
 
-Project management, without the chaos.
+A modern SaaS project management platform built to help teams organize projects, manage tasks, collaborate, and track productivity from one place.
 
-A full project-management platform: projects, tasks, a drag-and-drop Kanban board, team management, a calendar, and analytics — all in one authenticated dashboard.
+## 📌 About The Project
 
-## Running it locally
+FlowDesk is a full-stack project management application I built to challenge myself beyond traditional portfolio websites and practice building a more complete SaaS product.
 
-```bash
-npm install
-npm run dev
-```
+The platform allows users to create and manage projects, organize tasks, assign work to team members, track progress, and view project analytics through a centralized dashboard.
 
-Open the local URL it prints (usually `http://localhost:5173`). Sign up with any real email and password to create an account — Supabase creates it for real, and a small starter project appears on your first login so the dashboard isn't empty.
+## ✨ Features
 
-To build for production:
+- 📊 **Project Dashboard** — Overview of projects, tasks, progress, and productivity.
+- ✅ **Task Management** — Create, edit, delete, assign, and track tasks.
+- 📋 **Kanban Board** — Manage tasks visually across different workflow stages.
+- 👥 **Team Management** — Manage team members and assigned work.
+- 📈 **Project Analytics** — Track productivity and project progress with visual data.
+- 🔐 **Authentication** — Secure user registration and login.
+- 🔎 **Search & Filtering** — Quickly find projects and tasks.
+- 🌙 **Dark Mode** — Switch between light and dark themes.
+- 📱 **Responsive Design** — Optimized for desktop, tablet, and mobile devices.
 
-```bash
-npm run build
-npm run preview
-```
+## 🛠️ Tech Stack
 
-## Tech stack
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Supabase
+- React Router
+- Recharts
+- Lucide React
+- dnd-kit
 
-- **React 18 + TypeScript + Vite**
-- **Tailwind CSS** — custom design tokens (see `tailwind.config.js`)
-- **React Router** for all page routing
-- **Recharts** for the analytics charts
-- **dnd-kit** for the Kanban drag-and-drop
-- **Lucide React** for icons
+## 🏗️ What I Practiced
 
-## About the data layer
+Through this project, I worked on:
 
-This app is connected to a **real Supabase project** — real authentication, a real Postgres database, and row-level security so each user only ever sees their own projects and tasks.
+- Building reusable React components
+- Managing application state
+- Working with TypeScript
+- Implementing authentication
+- Connecting a frontend application to a database
+- Building CRUD functionality
+- Creating responsive SaaS interfaces
+- Handling loading, empty, and error states
+- Working with charts and data visualization
+- Implementing drag-and-drop interactions
 
-`.env.local` already has this project's Supabase URL and anon key filled in, so `npm install && npm run dev` connects immediately with no extra setup. If you ever need to point this at a *different* Supabase project (a fresh one, or moving to a new account), update the two values in `.env.local`:
+## <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/4696d913-40b0-4d12-9b97-95a479a16a74" />
 
-```
-VITE_SUPABASE_URL=your-project-url
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
 
-and re-run `supabase-schema.sql` in that project's SQL Editor to recreate the tables.
+## 👨🏽‍💻 Author
 
-`src/lib/db.ts` and `src/lib/auth.ts` hold every Supabase call the app makes — CRUD for projects/tasks/comments/notifications/activity, plus sign up, sign in, sign out, and session handling. `src/lib/supabaseClient.ts` is the single client instance everything else imports.
+Adetoro Adeniyi
 
-**Deploying this?** Whatever host you use (Vercel, Netlify, etc.) needs the same two environment variables set in its dashboard — `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` — since `.env.local` itself isn't committed to git.
+Frontend Developer focused on building responsive and user-friendly web applications with React, JavaScript, and TypeScript.
 
-## Project structure
-
-```
-src/
-  types/index.ts        # Shared types — mirrors the Supabase schema exactly
-  lib/
-    supabaseClient.ts    # The one Supabase client instance
-    db.ts                # Every data query (projects, tasks, comments, etc.)
-    auth.ts              # Sign up / sign in / sign out / session
-    utils.ts, useAsync.ts
-  context/
-    AuthContext.tsx       # Current user + auth actions
-    ThemeContext.tsx      # Light/dark mode
-  components/
-    layout/                # Sidebar, Topbar, AppLayout, ProtectedRoute
-    ui/                     # Avatar, Chips, Modal, ProgressBar, loading/empty/error states
-    dashboard/, projects/, tasks/, kanban/, team/
-  pages/                  # One file per route
-```
-
-## Routes
-
-| Route | Purpose |
-|---|---|
-| `/` | Landing page |
-| `/login`, `/signup` | Authentication |
-| `/dashboard` | KPIs, recent tasks, project progress, activity |
-| `/projects`, `/projects/:id` | Project list and detail (Overview / Members / Tasks / Activity / Progress tabs) |
-| `/tasks` | All tasks — list or Kanban board view, with filters |
-| `/team` | Team directory with search and role filters |
-| `/calendar` | Month view of every task deadline |
-| `/analytics` | Weekly completion, status distribution, productivity trend, overdue count, average completion time |
-| `/settings` | Profile, theme, notification preferences, account |
-
-## Notes
-
-- Every data-driven view handles loading, empty, and error states, with retry buttons where a request can fail.
-- The sidebar collapses behind a menu button on mobile; the Kanban board scrolls horizontally on small screens.
-- Dark mode is a class-based Tailwind toggle, persisted in `localStorage`.
+* GitHub: @tetris7
+* Portfolio: https://portfolio-iota-topaz-dwtzinij4j.vercel.app/
