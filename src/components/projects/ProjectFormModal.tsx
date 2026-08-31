@@ -31,9 +31,10 @@ export default function ProjectFormModal({
       setName('')
       setDescription('')
       onClose()
-    } catch {
-      setError('Could not save the project. Please try again.')
-    } finally {
+      } catch (err) {
+          setError(err instanceof Error ? err.message : 'Could not save the project. Please try again.')
+      } finally {
+
       setSubmitting(false)
     }
   }
