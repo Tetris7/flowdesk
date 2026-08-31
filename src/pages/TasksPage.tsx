@@ -136,7 +136,7 @@ export default function TasksPage() {
             projects={data.projects}
             onTasksChange={(next) => {
               const ids = new Set(next.map((t) => t.id))
-              setData({ ...data, tasks: [...data.tasks.filter((t) => !ids.has(t.id)), ...next] })
+              setData((prev) => (prev ? { ...prev, tasks: [...prev.tasks.filter((t) => !ids.has(t.id)), ...next] } : prev))
             }}
             onCardClick={(task) => {
               setEditingTask(task)
