@@ -51,13 +51,19 @@ Through this project, I worked on:
 - Working with charts and data visualization
 - Implementing drag-and-drop interactions
 
-## screenshot
+## screenshots
 
 <img width="1170" height="2007" alt="image" src="https://github.com/user-attachments/assets/923ef7c9-5b9f-467d-947f-382c333b2f84" />
 
 <img width="1170" height="1867" alt="image" src="https://github.com/user-attachments/assets/aab17231-206a-4275-9977-e1a7eceda855" />
 
-<img width="1170" height="1938" alt="image" src="https://github.com/user-attachments/assets/68ceca48-1255-424a-a87f-6e52ca34a72f" />
+<img width="1170" height="2532" alt="image" src="https://github.com/user-attachments/assets/edc2779f-8d51-4525-9291-3378a6900d37" />
+
+<img width="1170" height="2532" alt="image" src="https://github.com/user-attachments/assets/2a7697b3-c054-4ccb-a503-385b79b1aed8" />
+
+<img width="1170" height="2532" alt="image" src="https://github.com/user-attachments/assets/f3873cde-ab96-4740-8d01-ab20e66f5de9" />
+
+<img width="1170" height="2532" alt="image" src="https://github.com/user-attachments/assets/e7f14ebc-007e-44c9-a6a5-ed32ad120aaa" />
 
 
 ## 👨🏽‍💻 Author
@@ -68,3 +74,5 @@ Frontend Developer focused on building responsive and user-friendly web applicat
 
 * GitHub: @tetris7
 * Portfolio: https://portfolio-iota-topaz-dwtzinij4j.vercel.app/
+
+⭐ If you like this project, consider giving the repository a star!
