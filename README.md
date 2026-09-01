@@ -8,6 +8,10 @@ FlowDesk is a full-stack project management application I built to challenge mys
 
 The platform allows users to create and manage projects, organize tasks, assign work to team members, track progress, and view project analytics through a centralized dashboard.
 
+## 🚀 Live Demo
+https://flowdesk-ochre-pi.vercel.app/
+
+
 ## ✨ Features
 
 - 📊 **Project Dashboard** — Overview of projects, tasks, progress, and productivity.
